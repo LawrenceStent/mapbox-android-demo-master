@@ -1,0 +1,111 @@
+apply plugin: 'com.android.application'
+apply from: "$project.rootDir/script-git-version.gradle"
+apply plugin: 'com.google.firebase.firebase-perf'
+
+ext {
+    supportLibVersion = '25.3.1'
+}
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.3"
+
+    defaultConfig {
+        applicationId "com.mapbox.mapboxandroiddemo"
+        minSdkVersion 15
+        targetSdkVersion 26
+        versionCode gitVersionCode
+        versionName gitVersionName
+    }
+
+    productFlavors {
+        gpservices {
+            resValue "string", "firebase_app_id", "1:557332920931:android:bdf11618ae45dd61"
+            resValue "string", "firebase_api_key", "AIzaSyCGCYLyLoi31Hv-pkBO0D51zCyxjngJbz8"
+        }
+
+        nogpservices {
+        }
+    }
+
+    signingConfigs {
+        release {
+            keyAlias System.getenv("BITRISEIO_ANDROID_KEYSTORE_ALIAS")
+            keyPassword System.getenv("BITRISEIO_ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD")
+            storeFile file("$project.rootDir/mapbox_demo.keystore")
+            storePassword System.getenv("BITRISEIO_ANDROID_KEYSTORE_PASSWORD")
+        }
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix '.debug'
+            versionNameSuffix '-Debug'
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+
+    splits {
+        abi {
+            enable false
+            universalApk false
+        }
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+}
+
+dependencies {
+    // Wearable application module
+    gpservicesWearApp project(':MapboxAndroidWearDemo')
+    compile "com.android.support:gridlayout-v7:${supportLibVersion}"
+    compile "com.android.support:appcompat-v7:${supportLibVersion}"
+    compile "com.android.support:cardview-v7:${supportLibVersion}"
+    compile "com.android.support:recyclerview-v7:${supportLibVersion}"
+    compile "com.android.support:design:${supportLibVersion}"
+    compile "com.android.support:customtabs:${supportLibVersion}"
+    compile "com.android.support:support-v4:${supportLibVersion}"
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile 'com.google.code.gson:gson:2.8'
+
+    // Mapbox dependencies
+    compile('com.mapbox.mapboxsdk:mapbox-android-sdk:5.2.0-beta.1@aar') {
+        transitive = true
+    }
+
+    // Mapbox plugins
+    compile 'com.mapbox.mapboxsdk:mapbox-android-plugin-locationlayer:0.1.0'
+    compile 'com.mapbox.mapboxsdk:mapbox-android-plugin-building:0.1.0'
+    compile 'com.mapbox.mapboxsdk:mapbox-android-plugin-traffic:0.3.0'
+    compile 'com.mapbox.mapboxsdk:mapbox-android-plugin-geojson:0.1.0'
+
+    // Mapbox Android UI
+    compile 'com.mapbox.mapboxsdk:mapbox-android-ui:2.2.6'
+
+    // Other dependencies
+    compile 'com.google.firebase:firebase-crash:11.0.4'
+    compile 'com.google.firebase:firebase-perf:11.0.4'
+    compile 'com.github.javiersantos:MaterialStyledDialogs:2.1'
+    compile 'com.getbase:floatingactionbutton:1.10.1'
+    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.squareup.retrofit2:retrofit:2.2.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.2.0'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile 'com.squareup.okhttp3:okhttp:3.8.1'
+    compile 'com.afollestad.material-dialogs:commons:0.9.4.5'
+    compile 'com.github.Cutta:GifView:1.1'
+    gpservicesCompile 'com.google.firebase:firebase-crash:11.0.4'
+    compile project(':SharedCode')
+}
+
+apply from: '../checkstyle.gradle'
